@@ -1,0 +1,190 @@
+===== base
+overlap <P|A> = 0.8125  (13/16 = 0.8125)
+identity P(|0>|v) = (w.v)^2 verified on 1000 random states; |w| = 1; w.e1 = -0.9375 (= -(1-2/N) = -0.9375)
+zero-leakage completion: explicit orthogonal PCM built; P(|0>|P) = 3.08e-33, P(|0>|A) = 0.329590  (closed form ((N-2)/N)^2 delta^2 = 0.329590); existence bound delta^2 = 0.3750 <= 16(N-1)/N^2 = 0.4844
+
+Table 1 (all values in %; error = average over the two templates, ML count rule)
+scheme                                           p_P     p_A    gap     k=1     k=5    k=12  k(1%)
+KL+Grover, Mathematica completion (paper)       0.19   28.09  27.89   36.05   10.10   2.114     19
+KL+Grover, NumPy-SVD completion                 0.37   26.30  25.93   37.04   11.80   3.487     21
+KL+Grover, structured completion               21.46    1.23  20.23   39.88   17.94   9.644     36
+KL+Grover, gap-optimal completion               0.20   38.23  38.04   30.98    4.98   1.312     13
+KL+Grover, zero-leakage completion              0.00   32.96  32.96   33.52    6.77   0.412     10
+Template projection onto |P> (bright)         100.00   66.02  33.98   33.01    6.27   0.343     10
+Template projection, dark port                  0.00   33.98  33.98   33.01    6.27   0.343     10
+Single-copy Helstrom projector                 79.15   20.85  58.30   20.85    6.47   1.433     13
+Collective Helstrom bound (joint meas.)                               20.85    3.24   0.172      8
+
+ML thresholds at k = 12 (decide the high-p class iff m >= t):
+  KL+Grover, Mathematica completion (paper)    t =  1  high-p class = A
+  KL+Grover, NumPy-SVD completion              t =  1  high-p class = A
+  KL+Grover, structured completion             t =  1  high-p class = P
+  KL+Grover, gap-optimal completion            t =  2  high-p class = A
+  KL+Grover, zero-leakage completion           t =  1  high-p class = A
+  Template projection onto |P> (bright)        t = 12  high-p class = P
+  Template projection, dark port               t =  1  high-p class = A
+  Single-copy Helstrom projector               t =  6  high-p class = P
+
+wrote baseline_comparison.png
+===== circ
+NumPy-SVD PCM: rank(PCM - I) = 3, columns touched = 6
+
+circuit                                             CNOT    1q  depth CNOT depth   p_P     p_A    gap
+Grover diffusion D alone                              36    76     79         35 
+PCM, NumPy-SVD completion (generic synthesis)        423  2040   1537        418     0.37   26.30  25.93
+PCM, gap-optimal completion (generic synth.)         423  2039   1537        418     0.20   38.23  38.04
+PCM, structured completion (W^dagger)                  3    11      9          3    21.46    1.23  20.23
+Classifier: PCM(NumPy) + D                           459  2104   1603        450     0.37   26.30  25.93
+Classifier: PCM(gap-optimal) + D                     459  2104   1603        450     0.20   38.23  38.04
+Classifier: PCM(structured) + D                       39    87     89         38    21.46    1.23  20.23
+Template projection onto |P> (ANF oracle)             68    99    133         66   100.00   66.02  33.98
+Template projection onto |A> (ANF oracle)             49    74     90         47    66.02  100.00  33.98
+
+The same measurements synthesised directly as rank-one projections (inverse state preparation):
+projection onto                                     CNOT    1q  depth CNOT depth   p_P     p_A    gap   err k=5  err k=12
+w of PCM(structured) + D                              26    85     99         26    21.46    1.23  20.23    17.94    9.644
+w of PCM(NumPy) + D                                   26    94    109         26     0.37   26.30  25.93    11.80    3.487
+w of PCM(gap-optimal) + D                             26    85    100         26     0.20   38.23  38.04     4.98    1.312
+w of PCM(zero-leakage) + D                            26    86    101         26     0.00   32.96  32.96     6.77    0.412
+template |P> (bright)                                 15    79     82         15   100.00   66.02  33.98     6.27    0.343
+template |A> (bright)                                 15    65     68         15    66.02  100.00  33.98     6.27    0.343
+dark port (A-part orthogonal to P)                    26    89    104         26     0.00   33.98  33.98     6.27    0.343
+single-copy Helstrom vector                           26    84     98         26    79.15   20.85  58.30     6.47    1.433
+
+structured completion: |00000> labels P (p_P = 21.463%, p_A = 1.228%)
+wrote pcm_structured_circuit.png
+===== noise
+circuit                                         CNOT      p2     p_P     p_A    gap  err k=12
+A: PCM (generic synthesis) + diffusion           459   0.000    0.37   26.30  25.93      3.49
+A: PCM (generic synthesis) + diffusion           459   0.001    1.77   16.14  14.37     15.68
+A: PCM (generic synthesis) + diffusion           459   0.005    3.09    4.44   1.35     44.69
+A: PCM (generic synthesis) + diffusion           459   0.010    3.14    3.21   0.07     49.71
+B: structured PCM + diffusion                     39   0.000   21.46    1.23  20.23      9.64
+B: structured PCM + diffusion                     39   0.001   20.77    1.33  19.43     10.51
+B: structured PCM + diffusion                     39   0.005   18.23    1.71  16.53     13.81
+B: structured PCM + diffusion                     39   0.010   15.57    2.08  13.49     17.70
+C: KL+Grover, gap-optimal $w$ (projection)        26   0.000    0.20   38.23  38.04      1.31
+C: KL+Grover, gap-optimal $w$ (projection)        26   0.001    0.34   37.27  36.93      1.55
+C: KL+Grover, gap-optimal $w$ (projection)        26   0.005    0.87   33.66  32.79      2.81
+C: KL+Grover, gap-optimal $w$ (projection)        26   0.010    1.43   29.69  28.26      5.04
+D: KL+Grover, zero-leakage $w$ (projection)       26   0.000    0.00   32.96  32.96      0.41
+D: KL+Grover, zero-leakage $w$ (projection)       26   0.001    0.13   32.13  31.99      1.27
+D: KL+Grover, zero-leakage $w$ (projection)       26   0.005    0.62   29.02  28.41      4.40
+D: KL+Grover, zero-leakage $w$ (projection)       26   0.010    1.13   25.60  24.47      7.77
+E: template projection, bright                    15   0.000  100.00   66.02  33.98      0.34
+E: template projection, bright                    15   0.001   98.35   64.98  33.37      2.92
+E: template projection, bright                    15   0.005   92.03   61.00  31.03      7.96
+E: template projection, bright                    15   0.010   84.71   56.38  28.33     12.70
+F: template projection, dark port                 26   0.000    0.00   33.98  33.98      0.34
+F: template projection, dark port                 26   0.001    0.15   33.14  32.99      1.31
+F: template projection, dark port                 26   0.005    0.71   30.00  29.29      4.41
+F: template projection, dark port                 26   0.010    1.29   26.52  25.23      7.11
+wrote noise_comparison.png
+===== gen
+==================================================================================================== 
+Part A: exhaustive perturbations of the P / A templates
+
+test set: 32 images at distance 1 and 234 at distance 2 from the nearest template (ties excluded)
+
+ rule = ML:  mean / worst-case probability of the correct label [%]
+ scheme                                             d=1,k=1       d=1,k=5       d=1,k=12      d=2,k=1       d=2,k=5       d=2,k=12   
+ KL + Grover diffusion, zero-leakage completion    64.1 / 14.6   88.3 / 54.7   94.8 / 63.9   62.2 / 14.1   84.4 / 53.2   91.2 / 66.1 
+ KL + Grover diffusion, gap-optimal completion     65.6 / 18.2   89.6 / 63.4   94.0 / 67.2   62.9 / 16.3   85.1 / 59.0   89.8 / 60.7 
+ Template projection (bright)                      63.9 / 23.4   71.5 / 52.4   60.2 / 21.2   61.5 / 34.0   60.3 / 26.3   51.9 /  4.1 
+ Template projection (dark port)                   63.9 / 15.1   88.1 / 55.9   94.6 / 63.0   61.5 / 13.6   83.5 / 51.8   90.8 / 69.1 
+ Single-copy Helstrom projector                    73.9 / 55.5   86.4 / 60.3   93.8 / 75.2   69.8 / 48.8   79.2 / 47.8   87.3 / 58.1 
+
+ rule = MID:  mean / worst-case probability of the correct label [%]
+ scheme                                             d=1,k=1       d=1,k=5       d=1,k=12      d=2,k=1       d=2,k=5       d=2,k=12   
+ KL + Grover diffusion, zero-leakage completion    64.1 / 14.6   88.3 / 54.7   92.5 / 54.3   62.2 / 14.1   84.4 / 53.2   88.6 / 52.1 
+ KL + Grover diffusion, gap-optimal completion     65.6 / 18.2   89.6 / 63.4   88.1 / 37.8   62.9 / 16.3   85.1 / 59.0   81.9 / 31.1 
+ Template projection (bright)                      63.9 / 23.4   71.5 / 52.4   85.3 / 55.9   61.5 / 34.0   60.3 / 26.3   68.8 / 44.1 
+ Template projection (dark port)                   63.9 / 15.1   88.1 / 55.9   84.3 / 26.8   61.5 / 13.6   83.5 / 51.8   78.0 / 21.7 
+ Single-copy Helstrom projector                    73.9 / 55.5   86.4 / 60.3   93.8 / 75.2   69.8 / 48.8   79.2 / 47.8   87.3 / 58.1 
+
+==================================================================================================== 
+Part B: all pairs of twelve 4 x 4 glyphs
+
+66 pairs; differing pixels d: min 1, median 7, max 12; pairs with d <= 3 (zero-leakage completion exists): 11
+
+average error on the two templates at k = 12 [%]  (median, [min, max] over pairs)
+  pairs with d <= 3 (11):
+    KL + Grover diffusion, zero-leakage completion   median   2.5464   [  0.4122,  12.3723]
+    KL + Grover diffusion, gap-optimal completion    median   3.3139   [  1.3121,   9.7948]
+    Template projection (bright)                     median   2.0284   [  0.3426,  10.6238]
+    Template projection (dark port)                  median   2.0284   [  0.3426,  10.6238]
+    Single-copy Helstrom projector                   median   3.9702   [  1.4335,  11.1382]
+    Collective Helstrom bound                        median   1.0247   [  0.1716,   5.6287]
+  pairs with d >= 4 (55):
+    KL + Grover diffusion, zero-leakage completion   median   0.3636   [  0.0781,   0.5149]
+    KL + Grover diffusion, gap-optimal completion    median   0.3636   [  0.0781,   0.5149]
+    Template projection (bright)                     median   0.0001   [  0.0000,   0.0502]
+    Template projection (dark port)                  median   0.0001   [  0.0000,   0.0502]
+    Single-copy Helstrom projector                   median   0.0133   [  0.0000,   0.4995]
+    Collective Helstrom bound                        median   0.0000   [  0.0000,   0.0251]
+  pairs with all (66):
+    KL + Grover diffusion, zero-leakage completion   median   0.3864   [  0.0781,  12.3723]
+    KL + Grover diffusion, gap-optimal completion    median   0.3864   [  0.0781,   9.7948]
+    Template projection (bright)                     median   0.0001   [  0.0000,  10.6238]
+    Template projection (dark port)                  median   0.0001   [  0.0000,  10.6238]
+    Single-copy Helstrom projector                   median   0.0133   [  0.0000,  11.1382]
+    Collective Helstrom bound                        median   0.0000   [  0.0000,   5.6287]
+
+mean probability of the correct label on all one-pixel perturbations, k = 12 [%] (median over pairs [min, max])
+    KL + Grover diffusion, zero-leakage completion   ML rule  97.5 [ 88.6,  98.6]   midpoint rule  92.6 [ 88.6,  96.4]
+    KL + Grover diffusion, gap-optimal completion    ML rule  97.4 [ 89.1,  98.6]   midpoint rule  92.2 [ 87.5,  96.4]
+    Template projection (bright)                     ML rule  60.6 [ 58.6,  60.6]   midpoint rule  98.3 [ 58.6,  99.9]
+    Template projection (dark port)                  ML rule  96.2 [ 88.1,  97.3]   midpoint rule  95.7 [ 84.3,  99.8]
+    Single-copy Helstrom projector                   ML rule  99.5 [ 88.1,  99.9]   midpoint rule  99.0 [ 88.1,  99.9]
+
+==================================================================================================== 
+Part C: scaling with image size
+
+ fixed overlap 13/16 (pixel replication)
+     image qubits  overlap | gap [points] / copies needed for 1% average error on the templates
+                                     kl_grover_zl         kl_grover_opt              template                  dark              helstrom  coll. Helstrom
+    4x4         5  0.81250 |    32.959 /       10     38.037 /       13     33.984 /       10     33.984 /       10     58.296 /       13              8
+    8x8         7  0.81250 |    20.209 /       40     20.209 /       40     33.984 /       10     33.984 /       10     58.296 /       13              8
+   16x16        9  0.81250 |    10.255 /      170     10.255 /      170     33.984 /       10     33.984 /       10     58.296 /       13              8
+   32x32       11  0.81250 |     5.146 /      690      5.146 /      690     33.984 /       10     33.984 /       10     58.296 /       13              8
+   64x64       13  0.81250 |     2.576 /     2769      2.576 /     2769     33.984 /       10     33.984 /       10     58.296 /       13              8
+ fixed d = 3 differing pixels (embedding in a white canvas)
+     image qubits  overlap | gap [points] / copies needed for 1% average error on the templates
+                                     kl_grover_zl         kl_grover_opt              template                  dark              helstrom  coll. Helstrom
+    4x4         5  0.81250 |    32.959 /       10     38.037 /       13     33.984 /       10     33.984 /       10     58.296 /       13              8
+    8x8         7  0.95312 |     9.084 /       42     10.489 /       54      9.155 /       41      9.155 /       41     30.258 /       57             34
+   16x16        9  0.98828 |     2.325 /      167      2.685 /      215      2.330 /      166      2.330 /      166     15.264 /      231            137
+   32x32       11  0.99707 |     0.585 /      667      0.675 /      861      0.585 /      667      0.585 /      667      7.649 /      923            551
+   64x64       13  0.99927 |     0.146 /     2670      0.169 /     3447      0.146 /     2670      0.146 /     2670      3.827 /     3693           2204
+
+==================================================================================================== 
+Part D: independent test samples (scikit-learn 8 x 8 digits, binarised)
+
+896 training images (used only to choose the templates), 901 held-out test images, N = 128 (7 qubits)
+medoid templates: differing pixels between the two templates: min 8, median 16, max 23 (of 64)
+
+held-out accuracy, medoid templates, midpoint rule; pooled over the 45 pairs [mean (95% bootstrap CI)] and worst pair
+  scheme                                                             k=12                   k=50                  k=200               k -> inf
+  KL + Grover diffusion, zero-leakage completion    65.3 (64.4-66.0) w 58.1  63.5 (62.6-64.4) w 55.8  62.4 (61.4-63.4) w 53.4  61.9 (60.8-62.9) w 52.2
+  KL + Grover diffusion, gap-optimal completion     65.3 (64.4-66.0) w 58.1  63.5 (62.6-64.4) w 55.8  62.4 (61.4-63.4) w 53.4  61.9 (60.8-62.9) w 52.2
+  Template projection (bright)                      69.5 (68.8-70.2) w 54.4  70.9 (70.1-71.8) w 52.5  70.8 (69.9-71.7) w 51.4  70.9 (70.0-71.9) w 51.1
+  Template projection (dark port)                   71.7 (71.0-72.4) w 63.2  73.1 (72.3-73.9) w 63.8  73.5 (72.6-74.4) w 61.9  73.3 (72.3-74.3) w 58.9
+  Single-copy Helstrom projector                    78.9 (78.4-79.4) w 63.1  81.7 (81.0-82.3) w 64.3  82.2 (81.5-82.9) w 64.1  82.4 (81.6-83.3) w 62.9
+
+same, with one scalar threshold per classifier fitted on the training half (CAL rule)
+  KL + Grover diffusion, zero-leakage completion    77.1 (76.6-77.5) w 66.1  85.7 (85.2-86.2) w 71.7  89.9 (89.3-90.4) w 74.9  92.3 (91.7-92.8) w 77.5
+  KL + Grover diffusion, gap-optimal completion     77.1 (76.6-77.5) w 66.1  85.7 (85.2-86.2) w 71.7  89.9 (89.3-90.4) w 74.9  92.3 (91.7-92.8) w 77.5
+  Template projection (bright)                      72.7 (72.2-73.1) w 60.3  80.5 (79.9-81.0) w 64.2  84.4 (83.7-85.0) w 65.9  86.2 (85.4-87.0) w 66.5
+  Template projection (dark port)                   83.7 (83.3-84.1) w 69.2  90.9 (90.5-91.3) w 74.2  93.3 (92.9-93.8) w 76.8  94.3 (93.8-94.8) w 79.2
+  Single-copy Helstrom projector                    80.8 (80.4-81.2) w 67.8  88.4 (88.0-88.9) w 72.3  91.3 (90.8-91.8) w 74.9  92.4 (91.8-93.0) w 75.8
+  Classical nearest template (Hamming, full pixel access)  93.8 (93.3-94.3) worst pair  73.0
+
+randomly drawn training images as templates (20 draws per pair, 900 classifiers): held-out accuracy [%], mean (5th - 95th percentile over classifiers)
+  KL + Grover diffusion, zero-leakage completion   MID k=12  59.3 (51.9-69.9)   MID k=200  56.1 (50.3-68.0)   CAL k=200  82.4 (63.2-95.9)
+  KL + Grover diffusion, gap-optimal completion    MID k=12  59.3 (51.9-69.9)   MID k=200  56.1 (50.3-68.0)   CAL k=200  82.4 (63.2-95.9)
+  Template projection (bright)                     MID k=12  64.0 (53.0-77.3)   MID k=200  63.5 (51.2-83.5)   CAL k=200  79.1 (59.3-95.2)
+  Template projection (dark port)                  MID k=12  64.7 (54.4-76.9)   MID k=200  64.3 (52.3-82.0)   CAL k=200  86.5 (67.1-97.7)
+  Single-copy Helstrom projector                   MID k=12  70.6 (57.1-84.4)   MID k=200  72.0 (54.5-92.4)   CAL k=200  85.3 (66.5-97.9)
+  Classical nearest template                        85.2 (64.0-98.1)
+
+wrote generalization_perturbations.png, generalization_pairs.png, scaling.png, generalization_digits.png
